@@ -1,23 +1,28 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
+import Home from './pages/Home';
 import Login from './pages/Login';
-import MapView from './pages/MapView';
+import MapPage from './pages/MapPage';
 import ReportComplaint from './pages/ReportComplaint';
 import Dashboard from './pages/Dashboard';
 import './App.css';
 
-function App() {
+const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem('token');
+  return token ? children : <Navigate to="/login" />;
+};
 
+function App() {
   return (
     <Router>
       <Navbar />
       <Routes>
-        <Route path="/" element={<MapView />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/map" element={<MapPage />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/report" element={token ? <ReportComplaint /> : <Navigate to="/login" />} />
-        <Route path="/dashboard" element={token ? <Dashboard /> : <Navigate to="/login" />} />
+        <Route path="/report" element={<ProtectedRoute><ReportComplaint /></ProtectedRoute>} />
+        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
       </Routes>
     </Router>
   );
