@@ -1,5 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
+  iconUrl: require('leaflet/dist/images/marker-icon.png'),
+  shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
+});
 
 const categories = ['Pothole', 'Broken Streetlight', 'Garbage Dump', 'Open Drain', 'Other'];
 const categoryIcons = {
@@ -9,8 +19,9 @@ const categoryIcons = {
 
 function ReportComplaint() {
   const [form, setForm] = useState({
-    category: 'Pothole', description: '', address: '', latitude: '', longitude: ''
+    category: 'Pothole', description: '', address: '', latitude: 20.5937, longitude: 78.9629 // Default to center of India
   });
+  const [imageFile, setImageFile] = useState(null);
   const [msg, setMsg] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -35,13 +46,36 @@ function ReportComplaint() {
   }, [form.address, showSuggestions]);
 
   const handleSelectSuggestion = (suggestion) => {
+    const lat = parseFloat(suggestion.lat);
+    const lon = parseFloat(suggestion.lon);
     setForm({
       ...form,
       address: suggestion.display_name,
-      latitude: parseFloat(suggestion.lat).toFixed(6),
-      longitude: parseFloat(suggestion.lon).toFixed(6)
+      latitude: lat,
+      longitude: lon
     });
     setShowSuggestions(false);
+  };
+
+  const LocationMarker = () => {
+    useMapEvents({
+      click(e) {
+        setForm(prev => ({ ...prev, latitude: e.latlng.lat, longitude: e.latlng.lng }));
+      },
+    });
+    return form.latitude && form.longitude ? (
+      <Marker position={[form.latitude, form.longitude]} />
+    ) : null;
+  };
+
+  const MapController = () => {
+    const map = useMapEvents({});
+    useEffect(() => {
+      if (form.latitude && form.longitude) {
+        map.flyTo([form.latitude, form.longitude], 15);
+      }
+    }, [form.latitude, form.longitude, map]);
+    return null;
   };
 
   const getLocation = () => {
@@ -55,13 +89,28 @@ function ReportComplaint() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(''); setMsg(''); setLoading(true);
+    
     try {
       const token = localStorage.getItem('token');
-      await axios.post(`${process.env.REACT_APP_API_URL}/complaints`, form, {
-        headers: { Authorization: `Bearer ${token}` }
+      const formData = new FormData();
+      formData.append('category', form.category);
+      formData.append('description', form.description);
+      formData.append('address', form.address);
+      formData.append('latitude', form.latitude);
+      formData.append('longitude', form.longitude);
+      if (imageFile) {
+        formData.append('image', imageFile);
+      }
+
+      await axios.post(`${process.env.REACT_APP_API_URL}/complaints`, formData, {
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data'
+        }
       });
       setMsg('Complaint submitted successfully! It will appear on the live map shortly.');
-      setForm({ category: 'Pothole', description: '', address: '', latitude: '', longitude: '' });
+      setForm({ category: 'Pothole', description: '', address: '', latitude: 20.5937, longitude: 78.9629 });
+      setImageFile(null);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to submit complaint');
     }
@@ -111,7 +160,7 @@ function ReportComplaint() {
               style={{ resize: 'vertical' }} />
 
             <label>Address / Landmark</label>
-            <div style={{ position: 'relative' }}>
+            <div style={{ position: 'relative', marginBottom: '15px' }}>
               <input type="text" placeholder="e.g. Near MG Road bus stop, Bengaluru"
                 value={form.address}
                 onChange={e => {
@@ -125,7 +174,7 @@ function ReportComplaint() {
                 <div style={{
                   position: 'absolute', top: '100%', left: 0, right: 0,
                   background: '#1e293b', border: '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: '8px', zIndex: 10, marginTop: '4px',
+                  borderRadius: '8px', zIndex: 9999, marginTop: '4px',
                   maxHeight: '200px', overflowY: 'auto',
                   boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.5)'
                 }}>
@@ -146,13 +195,28 @@ function ReportComplaint() {
               )}
             </div>
 
-            <label>Location Coordinates</label>
-            <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
-              <input type="number" step="any" placeholder="Latitude"
-                value={form.latitude} onChange={e => setForm({ ...form, latitude: e.target.value })} />
-              <input type="number" step="any" placeholder="Longitude"
-                value={form.longitude} onChange={e => setForm({ ...form, longitude: e.target.value })} />
+            <label>Location on Map (Click to set pin)</label>
+            <div style={{ height: '250px', width: '100%', marginBottom: '15px', borderRadius: '10px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
+              <MapContainer center={[form.latitude, form.longitude]} zoom={5} style={{ height: '100%', width: '100%' }}>
+                <TileLayer
+                  url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                  attribution="CartoDB"
+                />
+                <LocationMarker />
+                <MapController />
+              </MapContainer>
             </div>
+
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', marginBottom: '15px' }}>
+              <input type="number" step="any" placeholder="Latitude" disabled
+                value={form.latitude} style={{ background: 'rgba(255,255,255,0.05)', color: '#94a3b8' }} />
+              <input type="number" step="any" placeholder="Longitude" disabled
+                value={form.longitude} style={{ background: 'rgba(255,255,255,0.05)', color: '#94a3b8' }} />
+            </div>
+
+            <label>Upload Image (Optional)</label>
+            <input type="file" accept="image/*" onChange={e => setImageFile(e.target.files[0])} 
+              style={{ marginBottom: '20px', padding: '10px', background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.2)' }} />
 
             <button type="button" onClick={getLocation} disabled={locating} style={{
               width: '100%', padding: '11px',

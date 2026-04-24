@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../models/db');
 const auth = require('../middleware/auth');
+const upload = require('../middleware/upload');
 
 // Get all complaints (public - for map)
 router.get('/', async (req, res) => {
@@ -29,14 +30,15 @@ router.get('/my', auth, async (req, res) => {
 });
 
 // Submit new complaint
-router.post('/', auth, async (req, res) => {
+router.post('/', auth, upload.single('image'), async (req, res) => {
   const { category, description, latitude, longitude, address } = req.body;
+  const image_url = req.file ? `/uploads/${req.file.filename}` : null;
   try {
     const [result] = await db.query(
       `INSERT INTO complaints
-       (citizen_id, category, description, latitude, longitude, address, status)
-       VALUES (?, ?, ?, ?, ?, ?, 'open')`,
-      [req.user.id, category, description, latitude, longitude, address]
+       (citizen_id, category, description, latitude, longitude, address, image_url, status)
+       VALUES (?, ?, ?, ?, ?, ?, ?, 'open')`,
+      [req.user.id, category, description, latitude, longitude, address, image_url]
     );
     const [newComplaint] = await db.query(
       'SELECT * FROM complaints WHERE id = ?', [result.insertId]

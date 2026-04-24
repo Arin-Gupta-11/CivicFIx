@@ -18,6 +18,7 @@ app.use(express.json());
 
 app.use('/api/auth', authRoutes);
 app.use('/api/complaints', complaintRoutes);
+app.use('/uploads', express.static('uploads'));
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'CivicFix backend is running ✅' });
