@@ -70,7 +70,7 @@ function MapView() {
     <div style={{
       display: 'flex',
       height: 'calc(100vh - 64px)',
-      background: '#0f172a',
+      background: '#fafaf8',
       overflow: 'hidden'
     }}>
 
@@ -82,10 +82,11 @@ function MapView() {
           transform: 'translateX(-50%)',
           zIndex: 1000,
           display: 'flex', gap: '6px',
-          background: 'rgba(15,23,42,0.85)',
+          background: 'rgba(255,255,255,0.95)',
           backdropFilter: 'blur(12px)',
           padding: '6px', borderRadius: '20px',
-          border: '1px solid rgba(255,255,255,0.08)'
+          border: '1px solid rgba(0,0,0,0.08)',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
         }}>
           {['all', 'open', 'in_progress', 'resolved'].map(s => (
             <button key={s} onClick={() => setFilter(s)} style={{
@@ -98,7 +99,7 @@ function MapView() {
                   : s === 'resolved' ? '#22c55e'
                   : '#3b82f6'
                 : 'transparent',
-              color: filter === s ? 'white' : '#64748b',
+              color: filter === s ? 'white' : '#555',
             }}>
               {s === 'all' ? 'All' : s === 'in_progress' ? 'In Progress'
                 : s.charAt(0).toUpperCase() + s.slice(1)}
@@ -112,14 +113,14 @@ function MapView() {
           zoomControl={false}
         >
           <TileLayer
-            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-            attribution="CartoDB"
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
           />
           {filtered.map(c => (
             <Marker key={c.id} position={[c.latitude, c.longitude]} icon={getIcon(c.status)}>
               <Popup>
                 <div style={{
-                  background: '#1e293b', color: '#e2e8f0',
+                  background: 'white', color: '#1a1a1a',
                   borderRadius: '12px', padding: '14px',
                   minWidth: '200px', fontFamily: 'Inter, sans-serif'
                 }}>
@@ -127,8 +128,15 @@ function MapView() {
                     <span style={{ fontSize: '20px' }}>{categoryIcons[c.category] || '📍'}</span>
                     <strong style={{ fontSize: '15px' }}>{c.category}</strong>
                   </div>
-                  <p style={{ fontSize: '13px', color: '#94a3b8', marginBottom: '8px' }}>{c.description}</p>
-                  <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '10px' }}>{c.address}</p>
+                  {c.image_url && (
+                    <div style={{ marginBottom: '8px' }}>
+                      <a href={`${process.env.REACT_APP_API_URL.replace('/api', '')}${c.image_url}`} target="_blank" rel="noopener noreferrer">
+                        <img src={`${process.env.REACT_APP_API_URL.replace('/api', '')}${c.image_url}`} alt="Complaint" style={{ width: '100%', height: '120px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #e8e8e8' }} />
+                      </a>
+                    </div>
+                  )}
+                  <p style={{ fontSize: '13px', color: '#555', marginBottom: '8px' }}>{c.description}</p>
+                  <p style={{ fontSize: '12px', color: '#888', marginBottom: '10px' }}>{c.address}</p>
                   <span style={{
                     display: 'inline-block', padding: '3px 10px',
                     borderRadius: '12px', fontSize: '11px', fontWeight: '700',
@@ -150,8 +158,8 @@ function MapView() {
       {/* RIGHT — Dashboard Panel */}
       <div style={{
         width: '360px',
-        background: '#0f172a',
-        borderLeft: '1px solid rgba(255,255,255,0.06)',
+        background: '#fafaf8',
+        borderLeft: '1px solid #e8e8e8',
         overflowY: 'auto',
         padding: '20px',
         display: 'flex',
@@ -161,10 +169,10 @@ function MapView() {
 
         {/* Title */}
         <div>
-          <h2 style={{ fontSize: '18px', fontWeight: '700', color: '#f1f5f9' }}>
+          <h2 style={{ fontSize: '18px', fontWeight: '700', color: '#1a1a1a' }}>
             Live Overview
           </h2>
-          <p style={{ fontSize: '12px', color: '#475569', marginTop: '2px' }}>
+          <p style={{ fontSize: '12px', color: '#666', marginTop: '2px' }}>
             Real-time civic issue tracker
           </p>
         </div>
@@ -172,53 +180,53 @@ function MapView() {
         {/* Stat Cards */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
           {[
-            { label: 'Total', count: stats.total, color: '#60a5fa', bg: 'rgba(59,130,246,0.1)', border: 'rgba(59,130,246,0.2)', icon: '📊' },
-            { label: 'Open', count: stats.open, color: '#f87171', bg: 'rgba(239,68,68,0.1)', border: 'rgba(239,68,68,0.2)', icon: '🔴' },
-            { label: 'In Progress', count: stats.in_progress, color: '#fbbf24', bg: 'rgba(245,158,11,0.1)', border: 'rgba(245,158,11,0.2)', icon: '🟡' },
-            { label: 'Resolved', count: stats.resolved, color: '#4ade80', bg: 'rgba(34,197,94,0.1)', border: 'rgba(34,197,94,0.2)', icon: '✅' },
+            { label: 'Total', count: stats.total, color: '#2563eb', bg: 'rgba(59,130,246,0.1)', border: 'rgba(59,130,246,0.2)', icon: '📊' },
+            { label: 'Open', count: stats.open, color: '#ef4444', bg: 'rgba(239,68,68,0.1)', border: 'rgba(239,68,68,0.2)', icon: '🔴' },
+            { label: 'In Progress', count: stats.in_progress, color: '#f59e0b', bg: 'rgba(245,158,11,0.1)', border: 'rgba(245,158,11,0.2)', icon: '🟡' },
+            { label: 'Resolved', count: stats.resolved, color: '#16a34a', bg: 'rgba(34,197,94,0.1)', border: 'rgba(34,197,94,0.2)', icon: '✅' },
           ].map(s => (
             <div key={s.label} style={{
-              background: s.bg,
+              background: 'white',
               border: `1px solid ${s.border}`,
               borderRadius: '16px',
               padding: '16px',
             }}>
               <div style={{ fontSize: '20px', marginBottom: '8px' }}>{s.icon}</div>
               <div style={{ fontSize: '26px', fontWeight: '700', color: s.color }}>{s.count}</div>
-              <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>{s.label}</div>
+              <div style={{ fontSize: '12px', color: '#666', marginTop: '2px' }}>{s.label}</div>
             </div>
           ))}
         </div>
 
         {/* Resolution Rate */}
         <div style={{
-          background: 'rgba(30,41,59,0.6)',
-          border: '1px solid rgba(255,255,255,0.06)',
+          background: 'white',
+          border: '1px solid #e8e8e8',
           borderRadius: '16px', padding: '18px'
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-            <span style={{ fontSize: '13px', fontWeight: '600', color: '#94a3b8' }}>Resolution Rate</span>
-            <span style={{ fontSize: '13px', fontWeight: '700', color: '#4ade80' }}>{resolutionRate}%</span>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: '#555' }}>Resolution Rate</span>
+            <span style={{ fontSize: '13px', fontWeight: '700', color: '#16a34a' }}>{resolutionRate}%</span>
           </div>
-          <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '10px', height: '8px', overflow: 'hidden' }}>
+          <div style={{ background: '#f0f0f0', borderRadius: '10px', height: '8px', overflow: 'hidden' }}>
             <div style={{
               width: `${resolutionRate}%`, height: '100%',
-              background: 'linear-gradient(90deg, #22c55e, #4ade80)',
+              background: 'linear-gradient(90deg, #22c55e, #16a34a)',
               borderRadius: '10px', transition: 'width 0.5s ease'
             }} />
           </div>
-          <p style={{ fontSize: '11px', color: '#475569', marginTop: '8px' }}>
+          <p style={{ fontSize: '11px', color: '#666', marginTop: '8px' }}>
             {stats.resolved} of {stats.total} complaints resolved
           </p>
         </div>
 
         {/* Category Breakdown */}
         <div style={{
-          background: 'rgba(30,41,59,0.6)',
-          border: '1px solid rgba(255,255,255,0.06)',
+          background: 'white',
+          border: '1px solid #e8e8e8',
           borderRadius: '16px', padding: '18px'
         }}>
-          <h3 style={{ fontSize: '13px', fontWeight: '600', color: '#94a3b8', marginBottom: '14px' }}>
+          <h3 style={{ fontSize: '13px', fontWeight: '600', color: '#555', marginBottom: '14px' }}>
             Category Breakdown
           </h3>
           {Object.entries(
@@ -229,50 +237,50 @@ function MapView() {
           ).sort((a, b) => b[1] - a[1]).map(([cat, count]) => (
             <div key={cat} style={{ marginBottom: '10px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                <span style={{ fontSize: '12px', color: '#94a3b8' }}>
+                <span style={{ fontSize: '12px', color: '#555' }}>
                   {categoryIcons[cat]} {cat}
                 </span>
-                <span style={{ fontSize: '12px', fontWeight: '600', color: '#60a5fa' }}>{count}</span>
+                <span style={{ fontSize: '12px', fontWeight: '600', color: '#2563eb' }}>{count}</span>
               </div>
-              <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '6px', height: '5px' }}>
+              <div style={{ background: '#f0f0f0', borderRadius: '6px', height: '5px' }}>
                 <div style={{
                   width: `${(count / stats.total) * 100}%`, height: '100%',
-                  background: 'linear-gradient(90deg, #3b82f6, #60a5fa)',
+                  background: 'linear-gradient(90deg, #3b82f6, #2563eb)',
                   borderRadius: '6px'
                 }} />
               </div>
             </div>
           ))}
           {complaints.length === 0 && (
-            <p style={{ fontSize: '12px', color: '#475569' }}>No data yet</p>
+            <p style={{ fontSize: '12px', color: '#666' }}>No data yet</p>
           )}
         </div>
 
         {/* Recent Activity */}
         <div style={{
-          background: 'rgba(30,41,59,0.6)',
-          border: '1px solid rgba(255,255,255,0.06)',
+          background: 'white',
+          border: '1px solid #e8e8e8',
           borderRadius: '16px', padding: '18px'
         }}>
-          <h3 style={{ fontSize: '13px', fontWeight: '600', color: '#94a3b8', marginBottom: '14px' }}>
+          <h3 style={{ fontSize: '13px', fontWeight: '600', color: '#555', marginBottom: '14px' }}>
             Recent Activity
           </h3>
           {recentActivity.length === 0 && (
-            <p style={{ fontSize: '12px', color: '#475569' }}>No complaints yet</p>
+            <p style={{ fontSize: '12px', color: '#666' }}>No complaints yet</p>
           )}
           {recentActivity.map(c => (
             <div key={c.id} style={{
               display: 'flex', alignItems: 'center', gap: '10px',
               padding: '10px 0',
-              borderBottom: '1px solid rgba(255,255,255,0.04)'
+              borderBottom: '1px solid #e8e8e8'
             }}>
               <div style={{ fontSize: '20px' }}>{categoryIcons[c.category] || '📍'}</div>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ fontSize: '13px', fontWeight: '500', color: '#e2e8f0',
+                <p style={{ fontSize: '13px', fontWeight: '500', color: '#1a1a1a',
                   whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {c.category}
                 </p>
-                <p style={{ fontSize: '11px', color: '#475569',
+                <p style={{ fontSize: '11px', color: '#666',
                   whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {c.address || 'No address'}
                 </p>

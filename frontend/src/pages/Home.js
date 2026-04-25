@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import axios from 'axios';
+import { Camera, MapPin, Megaphone, Eye } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 
 delete L.Icon.Default.prototype._getIconUrl;
@@ -27,10 +28,10 @@ function getIcon(status) {
 }
 
 const steps = [
-  { num: '01', icon: '📸', title: 'Snap a pic', desc: 'Saw a pothole on your way? Pull out your phone, take one photo. That\'s ground truth.' },
-  { num: '02', icon: '📍', title: 'Drop a pin', desc: 'Open CivicFix, the form pre-fills your location. Two taps, and the pin is on the public map.' },
-  { num: '03', icon: '📣', title: 'Rally your crew', desc: 'Share the link. The more upvotes a pin gets, the harder it is for the ward to ignore.' },
-  { num: '04', icon: '✅', title: 'Watch it close', desc: 'Every update shows up live. Before/after photos. Official status. No black boxes.' },
+  { num: '01', icon: <Camera size={28} color="#1a1a1a" strokeWidth={1.5} />, title: 'Snap a pic', desc: 'Saw a pothole on your way? Pull out your phone, take one photo. That\'s ground truth.' },
+  { num: '02', icon: <MapPin size={28} color="#1a1a1a" strokeWidth={1.5} />, title: 'Drop a pin', desc: 'Open CivicFix, the form pre-fills your location. Two taps, and the pin is on the public map.' },
+  { num: '03', icon: <Megaphone size={28} color="#1a1a1a" strokeWidth={1.5} />, title: 'Rally your crew', desc: 'Share the link. The more upvotes a pin gets, the harder it is for the ward to ignore.' },
+  { num: '04', icon: <Eye size={28} color="#1a1a1a" strokeWidth={1.5} />, title: 'Watch it close', desc: 'Every update shows up live. Before/after photos. Official status. No black boxes.' },
 ];
 
 const stepColors = ['#fde8e8', '#fde8d8', '#fefde8', '#e8fdf0'];
@@ -38,6 +39,16 @@ const stepColors = ['#fde8e8', '#fde8d8', '#fefde8', '#e8fdf0'];
 function Home() {
   const [complaints, setComplaints] = useState([]);
   const [stats, setStats] = useState({ total: 0, open: 0, in_progress: 0, resolved: 0 });
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.hash) {
+      const element = document.getElementById(location.hash.substring(1));
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  }, [location]);
 
   useEffect(() => {
     axios.get(`${process.env.REACT_APP_API_URL}/complaints`).then(res => {
@@ -169,24 +180,22 @@ function Home() {
         {/* Big Stat Cards */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '16px', marginBottom: '24px' }}>
           {[
-            { label: 'TOTAL REPORTS', count: stats.total, icon: '📊', bg: '#f0f0ff', suffix: 'reports' },
-            { label: 'OPEN', count: stats.open, icon: '🚨', bg: '#fff0f0' },
-            { label: 'IN PROGRESS', count: stats.in_progress, icon: '🔧', bg: '#fff8f0' },
-            { label: 'RESOLVED', count: stats.resolved, icon: '🎉', bg: '#f0fff4' },
+            { label: 'TOTAL REPORTS', count: stats.total, bg: '#f0f0ff', color: '#3b82f6' },
+            { label: 'OPEN', count: stats.open, bg: '#fff0f0', color: '#ef4444' },
+            { label: 'IN PROGRESS', count: stats.in_progress, bg: '#fff8f0', color: '#f59e0b' },
+            { label: 'RESOLVED', count: stats.resolved, bg: '#f0fff4', color: '#22c55e' },
           ].map(s => (
             <div key={s.label} style={{
               background: s.bg, borderRadius: '20px',
-              padding: '28px 24px', border: '1px solid #e8e8e8'
+              padding: '36px 24px', border: '1px solid #e8e8e8',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+              textAlign: 'center'
             }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <span style={{ fontSize: '11px', fontWeight: '700', color: '#888', letterSpacing: '0.5px' }}>
-                  {s.label}
-                </span>
-                <span style={{ fontSize: '22px' }}>{s.icon}</span>
-              </div>
-              <div style={{ fontSize: '52px', fontWeight: '800', color: '#1a1a1a', lineHeight: 1.1, marginTop: '12px' }}>
+              <div style={{ fontSize: '64px', fontWeight: '800', color: s.color, lineHeight: 1, marginBottom: '12px' }}>
                 {s.count}
-                {s.suffix && <span style={{ fontSize: '16px', fontWeight: '400', color: '#888', marginLeft: '6px' }}>{s.suffix}</span>}
+              </div>
+              <div style={{ fontSize: '18px', fontWeight: '700', color: '#1a1a1a', letterSpacing: '0.5px' }}>
+                {s.label}
               </div>
             </div>
           ))}
@@ -196,7 +205,7 @@ function Home() {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr', gap: '16px' }}>
           {/* Resolution Rate */}
           <div style={{ background: '#f9f9f9', borderRadius: '20px', padding: '28px', border: '1px solid #e8e8e8' }}>
-            <p style={{ fontSize: '11px', fontWeight: '700', color: '#888', letterSpacing: '0.5px', marginBottom: '12px' }}>
+            <p style={{ fontSize: '14px', fontWeight: '700', color: '#888', letterSpacing: '0.5px', marginBottom: '12px' }}>
               RESOLUTION RATE
             </p>
             <div style={{ fontSize: '52px', fontWeight: '800', color: '#1a1a1a', lineHeight: 1 }}>
@@ -218,11 +227,11 @@ function Home() {
           {/* Category Breakdown */}
           <div style={{ background: '#f9f9f9', borderRadius: '20px', padding: '28px', border: '1px solid #e8e8e8' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <p style={{ fontSize: '11px', fontWeight: '700', color: '#888', letterSpacing: '0.5px' }}>TOP ISSUES</p>
+              <p style={{ fontSize: '14px', fontWeight: '700', color: '#888', letterSpacing: '0.5px' }}>TOP ISSUES</p>
               <span style={{
                 background: '#1a1a1a', color: 'white',
-                fontSize: '11px', fontWeight: '600',
-                padding: '3px 10px', borderRadius: '100px'
+                fontSize: '12px', fontWeight: '600',
+                padding: '4px 12px', borderRadius: '100px'
               }}>5 cats</span>
             </div>
             {Object.entries(
@@ -248,7 +257,7 @@ function Home() {
           {/* Recent */}
           <div style={{ background: '#1a1a1a', borderRadius: '20px', padding: '28px', border: '1px solid #333' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-              <span style={{ fontSize: '11px', fontWeight: '700', color: '#888', letterSpacing: '0.5px' }}>JUST IN</span>
+              <span style={{ fontSize: '14px', fontWeight: '700', color: '#888', letterSpacing: '0.5px' }}>JUST IN</span>
               <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#22c55e', animation: 'pulse 2s infinite' }} />
             </div>
             {complaints.slice(0, 5).map(c => (
@@ -294,14 +303,14 @@ function Home() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
                 <span style={{
                   background: 'white', borderRadius: '100px',
-                  padding: '4px 12px', fontSize: '12px', fontWeight: '700', color: '#1a1a1a'
+                  padding: '4px 12px', fontSize: '14px', fontWeight: '800', color: '#1a1a1a'
                 }}>{step.num}</span>
-                <span style={{ fontSize: '28px' }}>{step.icon}</span>
+                <span>{step.icon}</span>
               </div>
-              <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#1a1a1a', marginBottom: '10px' }}>
+              <h3 style={{ fontSize: '24px', fontWeight: '800', color: '#1a1a1a', marginBottom: '12px', letterSpacing: '-0.5px' }}>
                 {step.title}
               </h3>
-              <p style={{ fontSize: '13px', color: '#666', lineHeight: 1.6 }}>{step.desc}</p>
+              <p style={{ fontSize: '16px', color: '#555', lineHeight: 1.6 }}>{step.desc}</p>
             </div>
           ))}
         </div>

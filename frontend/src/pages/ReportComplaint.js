@@ -33,7 +33,7 @@ function ReportComplaint() {
     const delayDebounce = setTimeout(async () => {
       if (form.address.length > 2 && showSuggestions) {
         try {
-          const res = await axios.get(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(form.address)}&format=json&limit=5`);
+          const res = await axios.get(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(form.address)}&format=json&limit=5&countrycodes=in`);
           setSuggestions(res.data);
         } catch (err) {
           console.error('Error fetching suggestions:', err);
@@ -120,14 +120,14 @@ function ReportComplaint() {
   return (
     <div style={{
       minHeight: 'calc(100vh - 64px)',
-      background: 'radial-gradient(ellipse at top, #1e3a5f 0%, #0f172a 60%)',
-      padding: '40px 20px', display: 'flex', justifyContent: 'center'
+      background: '#fafaf8',
+      padding: '104px 20px 40px', display: 'flex', justifyContent: 'center'
     }}>
       <div style={{ width: '100%', maxWidth: '580px' }}>
-        <h2 style={{ fontSize: '24px', fontWeight: '700', color: '#f1f5f9', marginBottom: '8px' }}>
+        <h2 style={{ fontSize: '24px', fontWeight: '700', color: '#1a1a1a', marginBottom: '8px' }}>
           Report a Civic Issue
         </h2>
-        <p style={{ color: '#64748b', fontSize: '14px', marginBottom: '28px' }}>
+        <p style={{ color: '#666', fontSize: '14px', marginBottom: '28px' }}>
           Help improve your city by reporting issues in your area
         </p>
 
@@ -143,11 +143,11 @@ function ReportComplaint() {
                 <div key={cat} onClick={() => setForm({ ...form, category: cat })} style={{
                   padding: '12px 8px', borderRadius: '10px', textAlign: 'center',
                   cursor: 'pointer', transition: 'all 0.2s',
-                  background: form.category === cat ? 'rgba(59,130,246,0.2)' : 'rgba(255,255,255,0.04)',
-                  border: form.category === cat ? '1px solid rgba(59,130,246,0.5)' : '1px solid rgba(255,255,255,0.06)',
+                  background: form.category === cat ? 'rgba(59,130,246,0.1)' : '#f9f9f9',
+                  border: form.category === cat ? '1px solid rgba(59,130,246,0.3)' : '1px solid #e8e8e8',
                 }}>
                   <div style={{ fontSize: '22px', marginBottom: '4px' }}>{categoryIcons[cat]}</div>
-                  <div style={{ fontSize: '11px', fontWeight: '600', color: form.category === cat ? '#60a5fa' : '#64748b' }}>
+                  <div style={{ fontSize: '11px', fontWeight: '600', color: form.category === cat ? '#2563eb' : '#666' }}>
                     {cat}
                   </div>
                 </div>
@@ -173,19 +173,19 @@ function ReportComplaint() {
               {showSuggestions && suggestions.length > 0 && (
                 <div style={{
                   position: 'absolute', top: '100%', left: 0, right: 0,
-                  background: '#1e293b', border: '1px solid rgba(255,255,255,0.1)',
+                  background: 'white', border: '1px solid #e8e8e8',
                   borderRadius: '8px', zIndex: 9999, marginTop: '4px',
                   maxHeight: '200px', overflowY: 'auto',
-                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.5)'
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
                 }}>
                   {suggestions.map((s, i) => (
                     <div key={i} onMouseDown={() => handleSelectSuggestion(s)} style={{
-                      padding: '10px 12px', fontSize: '13px', color: '#cbd5e1',
-                      borderBottom: i < suggestions.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
+                      padding: '10px 12px', fontSize: '13px', color: '#1a1a1a',
+                      borderBottom: i < suggestions.length - 1 ? '1px solid #e8e8e8' : 'none',
                       cursor: 'pointer', transition: 'background 0.2s',
                       textAlign: 'left'
                     }}
-                    onMouseEnter={e => e.target.style.background = 'rgba(255,255,255,0.05)'}
+                    onMouseEnter={e => e.target.style.background = '#f5f5f5'}
                     onMouseLeave={e => e.target.style.background = 'transparent'}
                     >
                       {s.display_name}
@@ -196,11 +196,11 @@ function ReportComplaint() {
             </div>
 
             <label>Location on Map (Click to set pin)</label>
-            <div style={{ height: '250px', width: '100%', marginBottom: '15px', borderRadius: '10px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <div style={{ height: '250px', width: '100%', marginBottom: '15px', borderRadius: '10px', overflow: 'hidden', border: '1px solid #e8e8e8' }}>
               <MapContainer center={[form.latitude, form.longitude]} zoom={5} style={{ height: '100%', width: '100%' }}>
                 <TileLayer
-                  url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-                  attribution="CartoDB"
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
                 />
                 <LocationMarker />
                 <MapController />
@@ -209,14 +209,14 @@ function ReportComplaint() {
 
             <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', marginBottom: '15px' }}>
               <input type="number" step="any" placeholder="Latitude" disabled
-                value={form.latitude} style={{ background: 'rgba(255,255,255,0.05)', color: '#94a3b8' }} />
+                value={form.latitude} style={{ background: '#f5f5f5', color: '#888' }} />
               <input type="number" step="any" placeholder="Longitude" disabled
-                value={form.longitude} style={{ background: 'rgba(255,255,255,0.05)', color: '#94a3b8' }} />
+                value={form.longitude} style={{ background: '#f5f5f5', color: '#888' }} />
             </div>
 
             <label>Upload Image (Optional)</label>
             <input type="file" accept="image/*" onChange={e => setImageFile(e.target.files[0])} 
-              style={{ marginBottom: '20px', padding: '10px', background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.2)' }} />
+              style={{ marginBottom: '20px', padding: '10px', background: '#f9f9f9', border: '1px dashed #ccc' }} />
 
             <button type="button" onClick={getLocation} disabled={locating} style={{
               width: '100%', padding: '11px',

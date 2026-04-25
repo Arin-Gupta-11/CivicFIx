@@ -33,7 +33,7 @@ function Login() {
     <div style={{
       minHeight: 'calc(100vh - 64px)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: 'radial-gradient(ellipse at top, #1e3a5f 0%, #0f172a 60%)',
+      background: '#fafaf8',
       padding: '20px'
     }}>
       <div style={{ width: '100%', maxWidth: '420px' }}>
@@ -46,20 +46,20 @@ function Login() {
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: '24px', fontWeight: '800', color: 'white'
           }}>C</div>
-          <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#f1f5f9', marginBottom: '8px' }}>
+          <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#1a1a1a', marginBottom: '8px' }}>
             {isRegister ? 'Create your account' : 'Welcome back'}
           </h1>
-          <p style={{ color: '#64748b', fontSize: '14px' }}>
+          <p style={{ color: '#666', fontSize: '14px' }}>
             {isRegister ? 'Join CivicFix to report civic issues' : 'Login to your CivicFix account'}
           </p>
         </div>
 
         {/* Card */}
         <div style={{
-          background: 'rgba(30,41,59,0.8)',
-          backdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255,255,255,0.08)',
-          borderRadius: '20px', padding: '32px'
+          background: 'white',
+          border: '1px solid #e8e8e8',
+          borderRadius: '20px', padding: '32px',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)'
         }}>
           {error && <div className="error">{error}</div>}
           <form onSubmit={handleSubmit}>
@@ -95,8 +95,8 @@ function Login() {
 
           <div style={{
             marginTop: '24px', paddingTop: '24px',
-            borderTop: '1px solid rgba(255,255,255,0.06)',
-            textAlign: 'center', fontSize: '14px', color: '#64748b'
+            borderTop: '1px solid #e8e8e8',
+            textAlign: 'center', fontSize: '14px', color: '#666'
           }}>
             {isRegister ? 'Already have an account?' : "Don't have an account?"}
             <button onClick={() => { setIsRegister(!isRegister); setError(''); }} style={{

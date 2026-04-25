@@ -22,10 +22,9 @@ function Navbar() {
 
   return (
     <nav style={{
-      position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000,
-      background: scrolled ? 'rgba(250,250,248,0.92)' : 'rgba(250,250,248,0.8)',
-      backdropFilter: 'blur(16px)',
-      borderBottom: scrolled ? '1px solid #e8e8e8' : '1px solid transparent',
+      position: 'sticky', top: 0, zIndex: 1000,
+      background: '#0f172a',
+      borderBottom: '1px solid rgba(255,255,255,0.1)',
       padding: '0 32px',
       height: '64px',
       display: 'flex',
@@ -37,35 +36,36 @@ function Navbar() {
       <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px' }}>
         <div style={{
           width: '36px', height: '36px',
-          background: '#1a1a1a',
+          background: 'white',
           borderRadius: '10px',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: '16px', fontWeight: '800', color: 'white'
+          fontSize: '16px', fontWeight: '800', color: '#0f172a'
         }}>C</div>
-        <span style={{ fontSize: '18px', fontWeight: '700', color: '#1a1a1a' }}>CivicFix</span>
+        <span style={{ fontSize: '18px', fontWeight: '700', color: 'white' }}>CivicFix</span>
       </Link>
 
       {/* Center Links */}
       <div style={{ display: 'flex', gap: '4px' }}>
         {[
+          { path: '/', label: 'Home' },
           { path: '/map', label: 'Live Map' },
           { path: '/#impact', label: 'Impact' },
           { path: '/#how', label: 'How it Works' },
         ].map(link => (
           <Link key={link.path} to={link.path} style={{
-            color: location.pathname === link.path ? '#1a1a1a' : '#666',
+            color: location.pathname === link.path ? 'white' : '#94a3b8',
             textDecoration: 'none',
             fontSize: '14px',
             fontWeight: '500',
             padding: '8px 14px',
             borderRadius: '100px',
-            background: location.pathname === link.path ? '#f0f0f0' : 'transparent',
+            background: location.pathname === link.path ? 'rgba(255,255,255,0.1)' : 'transparent',
             transition: 'all 0.2s',
           }}>{link.label}</Link>
         ))}
         {token && (user.role === 'officer' || user.role === 'worker') && (
           <Link to="/dashboard" style={{
-            color: '#666', textDecoration: 'none',
+            color: '#94a3b8', textDecoration: 'none',
             fontSize: '14px', fontWeight: '500',
             padding: '8px 14px', borderRadius: '100px',
           }}>Dashboard</Link>
@@ -74,25 +74,25 @@ function Navbar() {
 
       {/* Right Buttons */}
       <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+        <Link to="/report">
+          <button style={{ padding: '8px 18px', background: '#ef4444', color: 'white', border: 'none', borderRadius: '100px', cursor: 'pointer', fontSize: '14px', fontWeight: '600' }}>
+            Report Issue
+          </button>
+        </Link>
         {token ? (
           <>
-            <span style={{ fontSize: '13px', color: '#666' }}>Hi, {user.name}</span>
-            <button onClick={logout} className="btn btn-outline" style={{ padding: '8px 18px' }}>
+            <span style={{ fontSize: '13px', color: '#94a3b8', marginLeft: '4px' }}>Hi, {user.name}</span>
+            <button onClick={logout} style={{ padding: '8px 18px', background: 'transparent', color: 'white', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '100px', cursor: 'pointer', fontSize: '14px', fontWeight: '600' }}>
               Logout
             </button>
           </>
         ) : (
           <>
             <Link to="/login">
-              <button className="btn btn-outline" style={{ padding: '8px 18px' }}>Login</button>
+              <button style={{ padding: '8px 18px', background: 'transparent', color: 'white', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '100px', cursor: 'pointer', fontSize: '14px', fontWeight: '600' }}>Login</button>
             </Link>
           </>
         )}
-        <Link to="/report">
-          <button className="btn btn-primary" style={{ padding: '8px 18px' }}>
-            Report Issue
-          </button>
-        </Link>
       </div>
     </nav>
   );
