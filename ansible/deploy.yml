@@ -13,6 +13,18 @@
       apt:
         update_cache: yes
 
+    - name: Create Swap File (to prevent React build from hanging)
+      shell: |
+        if [ ! -f /swapfile ]; then
+          fallocate -l 2G /swapfile
+          chmod 600 /swapfile
+          mkswap /swapfile
+          swapon /swapfile
+          echo '/swapfile none swap sw 0 0' >> /etc/fstab
+        fi
+      register: swap_result
+      changed_when: "'swapon' in swap_result.stdout or 'fallocate' in swap_result.stdout"
+
     - name: Install required packages
       apt:
         name:
