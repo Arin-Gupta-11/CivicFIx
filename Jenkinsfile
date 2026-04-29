@@ -11,14 +11,17 @@ pipeline {
 }
 
         stage('Terraform') {
-            steps {
-                echo 'Running Terraform...'
-                dir('terraform') {
-                    sh 'terraform init'
-                    sh 'terraform apply -auto-approve'
-                }
-            }
+    steps {
+        echo 'Running Terraform...'
+        dir('terraform') {
+            sh '''
+            export PATH=/opt/homebrew/bin:$PATH
+            terraform init
+            terraform apply -auto-approve
+            '''
         }
+    }
+}
 
         stage('Ansible') {
             steps {
