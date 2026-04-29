@@ -1,0 +1,93 @@
+- name: Deploy CivicFix on AWS EC2
+  hosts: civicfix
+  become: yes
+
+  vars:
+    db_password: "arin110505"
+    jwt_secret: "civicfix_super_secret_key_2024"
+    email_user: "your_gmail@gmail.com"
+    email_pass: "your_gmail_app_password"
+
+  tasks:
+    - name: Update apt packages
+      apt:
+        update_cache: yes
+
+    - name: Install required packages
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+          - git
+        state: present
+
+    - name: Add Docker GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker repository
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu focal stable
+        state: present
+
+    - name: Install Docker
+      apt:
+        name: docker-ce
+        state: present
+        update_cache: yes
+
+    - name: Install Docker Compose
+      get_url:
+        url: https://github.com/docker/compose/releases/download/v2.24.0/docker-compose-linux-x86_64
+        dest: /usr/local/bin/docker-compose
+        mode: '0755'
+
+    - name: Add ubuntu user to docker group
+      user:
+        name: ubuntu
+        groups: docker
+        append: yes
+
+    - name: Clone CivicFix from GitHub
+      git:
+        repo: https://github.com/Arin-Gupta-11/CivicFIx.git
+        dest: /home/ubuntu/civicfix
+        version: main
+        force: yes
+
+    - name: Create .env file
+      copy:
+        dest: /home/ubuntu/civicfix/.env
+        content: |
+          DB_PASSWORD={{ db_password }}
+          JWT_SECRET={{ jwt_secret }}
+          EMAIL_USER={{ email_user }}
+          EMAIL_PASS={{ email_pass }}
+
+    - name: Update frontend API URL to EC2 IP
+      replace:
+        path: /home/ubuntu/civicfix/docker-compose.yml
+        regexp: 'http://localhost:5001'
+        replace: 'http://{{ ec2_ip }}:5001'
+
+    - name: Stop existing containers
+      shell: cd /home/ubuntu/civicfix && docker-compose down
+      ignore_errors: yes
+
+    - name: Build and start containers
+      shell: cd /home/ubuntu/civicfix && docker-compose up --build -d
+      async: 600
+      poll: 30
+
+    - name: Wait for app to start
+      wait_for:
+        port: 80
+        host: "{{ ec2_ip }}"
+        timeout: 120
+
+    - name: Show success message
+      debug:
+        msg: "CivicFix is live at http://{{ ec2_ip }}"
