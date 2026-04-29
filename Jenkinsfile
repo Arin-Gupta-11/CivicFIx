@@ -4,11 +4,11 @@ pipeline {
     stages {
 
         stage('Checkout') {
-            steps {
-                echo 'Cloning repository...'
-                git 'https://github.com/Arin-Gupta-11/CivicFIx'
-            }
-        }
+    steps {
+        echo 'Cloning repository...'
+        git branch: 'main', url: 'https://github.com/Arin-Gupta-11/CivicFix'
+    }
+}
 
         stage('Terraform') {
             steps {
