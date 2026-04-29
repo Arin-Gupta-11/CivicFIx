@@ -26,6 +26,8 @@ pipeline {
 
         stage('Ansible') {
             steps {
+                echo 'Waiting for EC2 to be ready...'
+                sleep 30
                 echo 'Running Ansible...'
                 sh '''
                 export PATH=/opt/homebrew/bin:$PATH
