@@ -24,13 +24,16 @@ pipeline {
 }
 
         stage('Ansible') {
-            steps {
-                echo 'Running Ansible...'
-                dir('ansible') {
-                    sh 'ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory.ini deploy.yml'
-                }
-            }
+    steps {
+        echo 'Running Ansible...'
+        dir('ansible') {
+            sh '''
+            export PATH=/opt/homebrew/bin:$PATH
+            ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory.ini deploy.yml
+            '''
         }
+    }
+}
 
         stage('Done') {
             steps {
